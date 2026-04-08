@@ -131,19 +131,25 @@ M.setup = function(server_config)
     )
 
     local existing = vim.lsp.config["tailwindcss"] or {}
+    -- Use "keep" so that existing capabilities (e.g. blink-cmp) are preserved;
+    -- only add colorProvider on top of whatever is already there.
     local capabilities = vim.tbl_deep_extend(
-      "force",
-      existing.capabilities or vim.lsp.protocol.make_client_capabilities(),
-      { textDocument = { colorProvider = { dynamicRegistration = true } } }
+      "keep",
+      { textDocument = { colorProvider = { dynamicRegistration = true } } },
+      existing.capabilities or vim.lsp.protocol.make_client_capabilities()
     )
 
-    vim.lsp.config("tailwindcss", vim.tbl_extend("force", existing, {
+    -- Use "keep" so that NixVim's pre-configured values (capabilities, filetypes,
+    -- cmd, …) are not overwritten – we only inject what tailwind-tools needs.
+    vim.lsp.config("tailwindcss", vim.tbl_extend("keep", {
       on_attach = M.make_on_attach(server_config.on_attach),
       root_dir = server_config.root_dir or M.make_root_dir(),
       settings = { tailwindCSS = settings },
       capabilities = capabilities,
-    }))
-    vim.lsp.enable("tailwindcss")
+    }, existing))
+    -- Do NOT call vim.lsp.enable() here – NixVim already enabled tailwindcss
+    -- before this plugin runs. Calling it again would stop the running client
+    -- and restart it, which kills completion until the server re-attaches.
     for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
       if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].filetype ~= "" then
         vim.api.nvim_exec_autocmds("FileType", { buffer = bufnr, modeline = false })
@@ -152,11 +158,14 @@ M.setup = function(server_config)
   end)
 end
 
----@return function(bufnr: integer): string?
+---@return function(bufnr: integer, on_dir: fun(root: string|nil))
 M.make_root_dir = function()
-  return function(bufnr)
+  return function(bufnr, on_dir)
     local fname = vim.api.nvim_buf_get_name(bufnr)
-    if fname == "" then return nil end
+    if fname == "" then
+      on_dir(nil)
+      return
+    end
     local root_files = {
       "tailwind.config.js",
       "tailwind.config.cjs",
@@ -168,7 +177,7 @@ M.make_root_dir = function()
       upward = true,
       path = vim.fs.dirname(fname),
     })
-    return found[1] and vim.fs.dirname(found[1]) or nil
+    on_dir(found[1] and vim.fs.dirname(found[1]) or nil)
   end
 end
 
