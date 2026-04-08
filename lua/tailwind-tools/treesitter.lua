@@ -50,7 +50,7 @@ M.find_class_ranges = function(bufnr, ft, filters)
     return results
   end
 
-  if vim.version().minor >= 10 then parser:parse(true) end
+  parser:parse(true)
 
   parser:for_each_tree(function(tree, lang_tree)
     local root = tree:root()
