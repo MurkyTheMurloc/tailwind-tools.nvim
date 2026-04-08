@@ -121,27 +121,29 @@ local function sort_classes(ranges, bufnr, sync)
 end
 ---@param server_config TailwindTools.ServerOption
 M.setup = function(server_config)
-  local settings = vim.tbl_get(server_config, "settings", "tailwindCSS") or {}
-  settings = vim.tbl_deep_extend("keep", settings, server_config.settings)
-  settings.includeLanguages = vim.tbl_extend(
-    "keep",
-    server_config.settings.includeLanguages or {},
-    filetypes.get_server_map()
-  )
+  vim.schedule(function()
+    local settings = vim.tbl_get(server_config, "settings", "tailwindCSS") or {}
+    settings = vim.tbl_deep_extend("keep", settings, server_config.settings)
+    settings.includeLanguages = vim.tbl_extend(
+      "keep",
+      server_config.settings.includeLanguages or {},
+      filetypes.get_server_map()
+    )
 
-  local existing = vim.lsp.config["tailwindcss"] or {}
-  local capabilities = vim.tbl_deep_extend(
-    "force",
-    existing.capabilities or vim.lsp.protocol.make_client_capabilities(),
-    { textDocument = { colorProvider = { dynamicRegistration = true } } }
-  )
+    local existing = vim.lsp.config["tailwindcss"] or {}
+    local capabilities = vim.tbl_deep_extend(
+      "force",
+      existing.capabilities or vim.lsp.protocol.make_client_capabilities(),
+      { textDocument = { colorProvider = { dynamicRegistration = true } } }
+    )
 
-  vim.lsp.config("tailwindcss", vim.tbl_extend("force", existing, {
-    on_attach = M.make_on_attach(server_config.on_attach),
-    root_dir = server_config.root_dir or M.make_root_dir(),
-    settings = { tailwindCSS = settings },
-    capabilities = capabilities,
-  }))
+    vim.lsp.config("tailwindcss", vim.tbl_extend("force", existing, {
+      on_attach = M.make_on_attach(server_config.on_attach),
+      root_dir = server_config.root_dir or M.make_root_dir(),
+      settings = { tailwindCSS = settings },
+      capabilities = capabilities,
+    }))
+  end)
 end
 
 ---@return function(bufnr: integer): string?
