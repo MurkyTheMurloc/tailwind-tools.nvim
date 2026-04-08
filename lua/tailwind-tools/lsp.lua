@@ -149,13 +149,6 @@ M.make_root_dir = function()
     local fname = vim.api.nvim_buf_get_name(bufnr)
     if fname == "" then return nil end
     local root_files = {
-      "app.css",
-      "src/app.css",
-      "src/index.css",
-      "src/styles.css",
-      "src/global.css",
-      "styles/globals.css",
-      "styles/global.css",
       "tailwind.config.js",
       "tailwind.config.cjs",
       "tailwind.config.mjs",
