@@ -16,6 +16,14 @@ M.set_hl_from = function(red, green, blue, style)
     local fg = luminance > 186 and "#000000" or "#FFFFFF"
     opts = { fg = fg, bg = "#" .. color }
   else
+    local luminance = red * 0.299 + green * 0.587 + blue * 0.114
+    if luminance < 80 then
+      red   = math.min(255, red   + 100)
+      green = math.min(255, green + 100)
+      blue  = math.min(255, blue  + 100)
+      color = string.format("%02x%02x%02x", red, green, blue)
+      hl_name = "TailwindColorFg" .. color
+    end
     opts = { fg = "#" .. color }
   end
 
