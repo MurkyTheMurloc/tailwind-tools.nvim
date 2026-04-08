@@ -149,16 +149,17 @@ M.make_root_dir = function()
     local fname = vim.api.nvim_buf_get_name(bufnr)
     if fname == "" then return nil end
     local root_files = {
+      "app.css",
+      "src/app.css",
+      "src/index.css",
+      "src/styles.css",
+      "src/global.css",
+      "styles/globals.css",
+      "styles/global.css",
       "tailwind.config.js",
       "tailwind.config.cjs",
       "tailwind.config.mjs",
       "tailwind.config.ts",
-      "assets/tailwind.config.js",
-      "assets/tailwind.config.ts",
-      "theme/static_src/tailwind.config.js",
-      "theme/static_src/tailwind.config.ts",
-      "app/assets/stylesheets/application.tailwind.css",
-      "app/assets/tailwind/application.css",
       "package.json",
     }
     local found = vim.fs.find(root_files, {
