@@ -143,6 +143,7 @@ M.setup = function(server_config)
       settings = { tailwindCSS = settings },
       capabilities = capabilities,
     }))
+    vim.lsp.enable("tailwindcss")
   end)
 end
 
