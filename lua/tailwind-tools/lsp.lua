@@ -143,9 +143,11 @@ M.setup = function(server_config)
   vim.lsp.enable("tailwindcss")
 end
 
----@return function(fname: string): string?
+---@return function(bufnr: integer): string?
 M.make_root_dir = function()
-  return function(fname)
+  return function(bufnr)
+    local fname = vim.api.nvim_buf_get_name(bufnr)
+    if fname == "" then return nil end
     local root_files = {
       "tailwind.config.js",
       "tailwind.config.cjs",
