@@ -144,16 +144,9 @@ M.setup = function(server_config)
       capabilities = capabilities,
     }))
     vim.lsp.enable("tailwindcss")
-    local tw_cfg = vim.lsp.config["tailwindcss"]
-    if tw_cfg then
-      for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-        if vim.api.nvim_buf_is_loaded(bufnr) then
-          local ft = vim.bo[bufnr].filetype
-          local fts = tw_cfg.filetypes or {}
-          if vim.tbl_contains(fts, ft) then
-            vim.lsp.start(tw_cfg, { bufnr = bufnr })
-          end
-        end
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].filetype ~= "" then
+        vim.api.nvim_exec_autocmds("FileType", { buffer = bufnr, modeline = false })
       end
     end
   end)
