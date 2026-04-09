@@ -139,13 +139,18 @@ M.setup = function(server_config)
       existing.capabilities or vim.lsp.protocol.make_client_capabilities()
     )
 
-    -- Use "keep" so that NixVim's pre-configured values (capabilities, filetypes,
-    -- cmd, …) are not overwritten – we only inject what tailwind-tools needs.
+    -- Merge capabilities separately with "force" so colorProvider is always set,
+    -- then use "keep" for everything else so NixVim's pre-configured values win.
+    local merged_capabilities = vim.tbl_deep_extend(
+      "force",
+      existing.capabilities or vim.lsp.protocol.make_client_capabilities(),
+      { textDocument = { colorProvider = { dynamicRegistration = true } } }
+    )
     vim.lsp.config("tailwindcss", vim.tbl_extend("keep", {
       on_attach = M.make_on_attach(server_config.on_attach),
       root_dir = server_config.root_dir or M.make_root_dir(),
       settings = { tailwindCSS = settings },
-      capabilities = capabilities,
+      capabilities = merged_capabilities,
     }, existing))
     -- Do NOT call vim.lsp.enable() here – NixVim already enabled tailwindcss
     -- before this plugin runs. Calling it again would stop the running client
